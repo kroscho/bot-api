@@ -602,11 +602,11 @@ class SparqlQueries:
             if user_login == login and user_password == h.hexdigest():
                 interests = self.getInterestsOfUser(user)
                 roles = self.getRoleOfUser(user)
-                response.append({'message': True, 'login': login, 'user': user, 'name': user_name, 'surname': user_surname, 'placeOfWork': user_place, 'interests': interests, 'roles': roles})
+                response.append({'log': True, 'message': "Успешно!", 'login': login, 'user': user, 'name': user_name, 'surname': user_surname, 'placeOfWork': user_place, 'interests': interests, 'roles': roles})
                 return response
     
         if response==[]:
-            response.append({'message': False, 'user': ""})
+            response.append({'log': False, 'message': "Логин или пароль неправильно набраны!"})
         return response
 
     # регистрируем пользователя
@@ -896,6 +896,14 @@ def getUser():
     typeSearch = search.Authors
     login = request.args.get('login', '')
     password = request.args.get('password', '')
+    if (login == "" or password == ""):
+        data = [{'log': False, 'message': "Введите все поля!"}]
+        data = json.dumps(data, ensure_ascii=False)
+        return data
+    if (login.find('@') == -1):
+        data = [{'log': False, 'message': "Логин должен содержать: @!"}]
+        data = json.dumps(data, ensure_ascii=False)
+        return data
     # запрос к онтологии
     runQuery = SparqlQueries(path, typeSearch)
     data = runQuery.checkUser(login, password)
@@ -911,6 +919,14 @@ def regUser():
     placeOfWork = request.args.get('placeOfWork', '')
     login = request.args.get('login', '')
     password = request.args.get('password', '')
+    if (name == "" or surname == "" or login == "" or password == ""):
+        data = {'reg': False, 'message': "Введите все обязательные поля!"}
+        data = json.dumps(data, ensure_ascii=False)
+        return data
+    if login.find('@') == -1:
+        data = {'reg':False, 'message': "Логин должен содержать: @"}
+        data = json.dumps(data, ensure_ascii=False)
+        return data
     # запрос к онтологии
     runQuery = SparqlQueries(path, typeSearch)
     data = runQuery.regUser(name, surname, placeOfWork, login, password)
